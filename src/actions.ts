@@ -3,9 +3,10 @@
  */
 
 import { deprecations } from './deprecations';
-import { createRegistry, type HookCallback } from './registry';
+import { type HookCallback } from './registry';
+import { actionsRegistry, debugLog } from './singleton';
 
-export const actionsRegistry = createRegistry();
+export { actionsRegistry };
 
 export function addAction(hook: string, callback: HookCallback, priority = 10): void {
   actionsRegistry.add(deprecations.resolveSilent(hook), callback, priority);
@@ -16,6 +17,7 @@ export function doAction(hook: string, ...args: unknown[]): void {
   const callbacks = deprecations.hasAliases()
     ? actionsRegistry.collectMany([canonical, ...deprecations.aliasesFor(canonical)])
     : actionsRegistry.collect(canonical);
+  debugLog('doAction', hook, args, callbacks.length);
   for (const callback of callbacks) {
     callback(...args);
   }
