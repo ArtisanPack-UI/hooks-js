@@ -1,6 +1,6 @@
 {
   "name": "@artisanpack-ui/hooks-js",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "WordPress-style actions and filters for JavaScript, with a React adapter.",
   "license": "MIT",
   "author": "Jacob Martella <me@jacobmartella.com>",

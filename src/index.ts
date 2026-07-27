@@ -2,7 +2,7 @@ import { addAction, doAction, hasAction, removeAction, removeAllActions } from '
 import { aliasesFor, deprecateHook, hasAliases, resetDeprecationLogState } from './deprecations';
 import { addFilter, applyFilters, hasFilter, removeAllFilters, removeFilter } from './filters';
 
-export const VERSION = '0.0.0';
+export const VERSION = '1.0.0';
 
 export type { HookCallback } from './registry';
 
