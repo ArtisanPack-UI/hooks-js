@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { actionsRegistry, addAction } from '../actions';
 import { deprecateHook, deprecations } from '../deprecations';
-import { addFilter, filtersRegistry, removeFilter } from '../filters';
+import { addFilter, applyFilters, filtersRegistry, removeFilter } from '../filters';
 
 import { HookSlot, useAction, useFilter, useHookedChildren } from './index';
 
@@ -213,5 +213,86 @@ describe('SSR safety', () => {
       </StrictMode>,
     );
     expect(getByText('HI')).toBeInTheDocument();
+  });
+});
+
+describe('adapter subscription lifecycle', () => {
+  it("removes only the unmounted component's subscribers, not sibling ones", () => {
+    // Two consumers on the same hook. When one unmounts, the other must
+    // keep re-rendering on filter mutations.
+    function Consumer({ id }: { id: string }): ReactNode {
+      const value = useFilter<string>('siblings', 'seed');
+      return <span data-testid={`c-${id}`}>{value}</span>;
+    }
+
+    const { rerender, unmount } = render(
+      <>
+        <Consumer id="a" />
+        <Consumer id="b" />
+      </>,
+    );
+
+    expect(screen.getByTestId('c-a').textContent).toBe('seed');
+    expect(screen.getByTestId('c-b').textContent).toBe('seed');
+
+    // Unmount only one of them by re-rendering without it.
+    rerender(<Consumer id="b" />);
+    expect(screen.queryByTestId('c-a')).not.toBeInTheDocument();
+    expect(screen.getByTestId('c-b')).toBeInTheDocument();
+
+    // Sibling must still react to filter changes.
+    act(() => {
+      addFilter('siblings', (v: string) => v.toUpperCase());
+    });
+    expect(screen.getByTestId('c-b').textContent).toBe('SEED');
+
+    unmount();
+    // After full unmount, mutating the registry must not throw.
+    expect(() => addFilter('siblings', (v: string) => v)).not.toThrow();
+  });
+
+  it('StrictMode double-invoke does not register the same effect-attached callback twice', () => {
+    // Effects run twice in StrictMode in dev; the cleanup between the two
+    // must remove the first registration so we end up with exactly one.
+    const filterFn = (v: string): string => `${v}!`;
+    function Consumer(): ReactNode {
+      useEffect(() => {
+        addFilter('strict.title', filterFn);
+        return () => {
+          removeFilter('strict.title', filterFn);
+        };
+      }, []);
+      return <span>{useFilter<string>('strict.title', 'hi')}</span>;
+    }
+
+    render(
+      <StrictMode>
+        <Consumer />
+      </StrictMode>,
+    );
+
+    // Rendered value proves the callback is registered exactly once — a
+    // duplicate registration would produce 'hi!!'.
+    expect(screen.getByText('hi!')).toBeInTheDocument();
+    expect(applyFilters<string>('strict.title', 'go')).toBe('go!');
+  });
+
+  it('post-mount registration triggers a re-render even under StrictMode', () => {
+    function Consumer(): ReactNode {
+      return <span>{useFilter<string>('mid.mount', 'lo')}</span>;
+    }
+
+    render(
+      <StrictMode>
+        <Consumer />
+      </StrictMode>,
+    );
+    expect(screen.getByText('lo')).toBeInTheDocument();
+
+    act(() => {
+      addFilter('mid.mount', (v: string) => v.toUpperCase());
+    });
+
+    expect(screen.getByText('LO')).toBeInTheDocument();
   });
 });
