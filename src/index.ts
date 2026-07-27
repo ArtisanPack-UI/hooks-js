@@ -9,6 +9,14 @@ export { addAction, doAction, removeAction, removeAllActions, hasAction } from '
 
 export { addFilter, applyFilters, removeFilter, removeAllFilters, hasFilter } from './filters';
 
+export {
+  deprecateHook,
+  hasAliases,
+  aliasesFor,
+  resetDeprecationLogState,
+  type DeprecationLevel,
+} from './deprecations';
+
 /**
  * True if any action OR filter callback is registered under this hook name.
  */

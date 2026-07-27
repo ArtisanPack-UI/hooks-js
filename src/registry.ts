@@ -18,14 +18,35 @@ export interface HookRegistry {
   removeAll(hook: string, priority?: number | false): boolean;
   has(hook: string): boolean;
   collect(hook: string): HookCallback[];
+  /**
+   * Merge callbacks across multiple hook names into a single dispatch list.
+   * Entries are sorted globally by (priority asc, seq asc) and deduplicated
+   * by callable identity — a callback registered under more than one of the
+   * given names still fires exactly once.
+   */
+  collectMany(hooks: readonly string[]): HookCallback[];
+  version(hook: string): number;
+  subscribe(hook: string, listener: () => void): () => void;
   reset(): void;
 }
 
 export function createRegistry(): HookRegistry {
   const callbacks = new Map<string, Bucket>();
+  const versions = new Map<string, number>();
+  const listeners = new Map<string, Set<() => void>>();
   let sequence = 0;
 
-  return {
+  function bump(hook: string): void {
+    versions.set(hook, (versions.get(hook) ?? 0) + 1);
+    const hookListeners = listeners.get(hook);
+    if (hookListeners) {
+      for (const listener of hookListeners) {
+        listener();
+      }
+    }
+  }
+
+  const registry: HookRegistry = {
     add(hook, callback, priority = 10) {
       let bucket = callbacks.get(hook);
       if (!bucket) {
@@ -39,6 +60,7 @@ export function createRegistry(): HookRegistry {
       } else {
         bucket.set(priority, [entry]);
       }
+      bump(hook);
     },
 
     remove(hook, callback, priority = 10) {
@@ -57,6 +79,7 @@ export function createRegistry(): HookRegistry {
           if (bucket.size === 0) {
             callbacks.delete(hook);
           }
+          bump(hook);
           return true;
         }
       }
@@ -73,10 +96,12 @@ export function createRegistry(): HookRegistry {
         if (bucket.size === 0) {
           callbacks.delete(hook);
         }
+        bump(hook);
         return true;
       }
 
       callbacks.delete(hook);
+      bump(hook);
       return true;
     },
 
@@ -88,6 +113,8 @@ export function createRegistry(): HookRegistry {
 
     reset() {
       callbacks.clear();
+      versions.clear();
+      listeners.clear();
       sequence = 0;
     },
 
@@ -107,5 +134,63 @@ export function createRegistry(): HookRegistry {
       }
       return out;
     },
+
+    collectMany(hooks) {
+      if (hooks.length === 1) {
+        return registry.collect(hooks[0]!);
+      }
+
+      // Merge every priority bucket from every hook name, then sort by
+      // (priority asc, seq asc). Snapshot each entries[] up front so
+      // mid-dispatch mutations do not leak into this pass.
+      const merged: Array<{ priority: number; entry: Entry }> = [];
+      for (const hook of hooks) {
+        const bucket = callbacks.get(hook);
+        if (!bucket) continue;
+        for (const [priority, entries] of bucket) {
+          for (const entry of entries.slice()) {
+            merged.push({ priority, entry });
+          }
+        }
+      }
+
+      merged.sort((a, b) => {
+        if (a.priority !== b.priority) return a.priority - b.priority;
+        return a.entry[0] - b.entry[0];
+      });
+
+      const seen = new Set<HookCallback>();
+      const out: HookCallback[] = [];
+      for (const { entry } of merged) {
+        const cb = entry[1];
+        if (seen.has(cb)) continue;
+        seen.add(cb);
+        out.push(cb);
+      }
+      return out;
+    },
+
+    version(hook) {
+      return versions.get(hook) ?? 0;
+    },
+
+    subscribe(hook, listener) {
+      let hookListeners = listeners.get(hook);
+      if (!hookListeners) {
+        hookListeners = new Set();
+        listeners.set(hook, hookListeners);
+      }
+      hookListeners.add(listener);
+      return () => {
+        const set = listeners.get(hook);
+        if (!set) return;
+        set.delete(listener);
+        if (set.size === 0) {
+          listeners.delete(hook);
+        }
+      };
+    },
   };
+
+  return registry;
 }
