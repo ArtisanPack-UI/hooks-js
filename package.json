@@ -1,6 +1,6 @@
 {
   "name": "@artisanpack-ui/hooks-js",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "WordPress-style actions and filters for JavaScript, with a React adapter.",
   "license": "MIT",
   "author": "Jacob Martella <me@jacobmartella.com>",
@@ -13,7 +13,10 @@
   },
   "homepage": "https://github.com/ArtisanPack-UI/hooks-js#readme",
   "type": "module",
-  "sideEffects": false,
+  "sideEffects": [
+    "./dist/index.cjs",
+    "./dist/index.mjs"
+  ],
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -47,6 +50,7 @@
     "type-check": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "prepublishOnly": "npm run clean && npm run build"
   },
   "peerDependencies": {
@@ -64,6 +68,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.2.0",
+    "@vitest/coverage-v8": "^4.1.10",
     "eslint": "^9.39.4",
     "eslint-plugin-react-hooks": "^7.0.1",
     "jsdom": "^29.0.1",
