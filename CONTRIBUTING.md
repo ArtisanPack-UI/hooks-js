@@ -112,12 +112,32 @@ If the bug involves Module Federation or the `globalThis.ApHooks` escape hatch, 
 
 ## Release process (maintainers)
 
-1. Update `CHANGELOG.md` — move entries from `[Unreleased]` under a new dated version heading.
-2. Bump `version` in `package.json`.
-3. Update `VERSION` in `src/index.ts` to match.
-4. Tag the release commit (`git tag vX.Y.Z`) and push tags.
-5. `npm run clean && npm run build`.
-6. `npm publish` (with 2FA).
+Releases are automated by `.github/workflows/release.yml`. Publishing happens when a `vX.Y.Z` tag is pushed — the workflow lints, formats-checks, type-checks, tests with coverage, builds, then runs `npm publish --provenance --access public` and creates a GitHub Release whose body is extracted from the matching `CHANGELOG.md` section.
+
+To cut a release:
+
+1. Update `CHANGELOG.md` — move entries from `[Unreleased]` under a new `## [X.Y.Z] - YYYY-MM-DD` heading. The workflow extracts this section verbatim as the GitHub Release body, so it must exist for the tag.
+2. Bump `version` in `package.json` to `X.Y.Z`.
+3. Update the `VERSION` string in `src/index.ts` to match.
+4. Commit the version bump on `main` (or the release branch), then tag it: `git tag vX.Y.Z && git push origin vX.Y.Z`. The workflow enforces that the tag version matches `package.json` — mismatches fail the job before publishing.
+5. Watch the `Release` workflow run in Actions; when it goes green, verify the new version is live on npm (`npm view @artisanpack-ui/hooks-js version`) and that the GitHub Release was created.
+
+### Required repository secret
+
+- **`NPM_TOKEN`** — an npm automation token with publish rights on the `@artisanpack-ui` scope. Set at **Settings → Secrets and variables → Actions → New repository secret**. The workflow reads it as `NODE_AUTH_TOKEN` via `actions/setup-node`.
+
+Provenance is enabled (`--provenance`), which requires the workflow's `id-token: write` permission — already declared in `release.yml`. No other secret or OIDC setup is needed.
+
+### Local dry-run
+
+Before tagging a release, verify the tarball contents locally:
+
+```bash
+npm run clean && npm run build
+npm pack --dry-run
+```
+
+The tarball should contain `dist/`, `README.md`, `LICENSE`, `CHANGELOG.md`, and `package.json` — nothing else.
 
 ## License
 
