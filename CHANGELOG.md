@@ -28,6 +28,13 @@ Initial stable release of `@artisanpack-ui/hooks-js`. Public API is now stable a
   `faq.md`, `security.md`, `contributing.md`, `changelog.md`.
 - **`CONTRIBUTING.md`** — dev setup, script matrix, code style, testing
   conventions, docs conventions, PR conventions, release process.
+- **Automated release workflow** (`.github/workflows/release.yml`) — triggered
+  on `v*.*.*` tags, lints/type-checks/tests/builds, verifies that the tag
+  version matches `package.json`, then runs `npm publish --provenance --access
+  public` and creates a GitHub Release whose body is extracted from the
+  matching `CHANGELOG.md` section. Requires an `NPM_TOKEN` repo secret with
+  publish rights on the `@artisanpack-ui` scope; provenance uses OIDC via
+  `id-token: write`.
 - Cross-module state singleton keyed by `Symbol.for('@artisanpack-ui/hooks-js/singleton')`
   on `globalThis`. Duplicate copies of the package (Module Federation without
   `shared: { singleton: true }`) share one registry so callbacks registered
