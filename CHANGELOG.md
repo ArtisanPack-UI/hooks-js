@@ -7,11 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - TBD
+
+Initial stable release of `@artisanpack-ui/hooks-js`. Public API is now stable and follows semantic versioning going forward.
+
 ### Added
 
+- **Documentation surface**: full `README.md` with install, quickstart, API reference,
+  React adapter section, Module Federation section, deprecation section, and
+  examples for both plain JS and React. Hook naming convention documented
+  verbatim from the `artisanpack-ui/hooks` PHP README. Migration guide from
+  `@wordpress/hooks` covering namespace removal, priority range, alias handling,
+  React reactivity, and globals. Cross-link section pointing to the PHP twin.
+- **Long-form `/docs` tree** with YAML frontmatter and GitLab-wiki-style
+  cross-links: `home.md`, `getting-started.md`, `actions.md`, `filters.md`,
+  `priorities-and-execution-order.md`, `hook-naming-and-deprecations.md`,
+  `react.md` (+ `react/` subtree covering `useFilter`, `useAction`,
+  `useHookedChildren`, `<HookSlot>`, and SSR), `module-federation.md`,
+  `devtools-debug.md`, `migration-from-wordpress-hooks.md`, `testing.md`,
+  `faq.md`, `security.md`, `contributing.md`, `changelog.md`.
+- **`CONTRIBUTING.md`** — dev setup, script matrix, code style, testing
+  conventions, docs conventions, PR conventions, release process.
 - Cross-module state singleton keyed by `Symbol.for('@artisanpack-ui/hooks-js/singleton')`
   on `globalThis`. Duplicate copies of the package (Module Federation without
-  `shared: { singleton: true }`) now share one registry so callbacks registered
+  `shared: { singleton: true }`) share one registry so callbacks registered
   under one copy fire when dispatched from another.
 - `globalThis.ApHooks` public-API escape hatch installed on first import of the
   entry module. Plugins loaded outside the bundler graph can call
@@ -48,3 +67,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   re-firing on freshly-allocated but semantically-equal tuples. SSR-safe:
   server render never subscribes, and callbacks registered in `useEffect`
   attach on hydrate.
+
+[Unreleased]: https://github.com/ArtisanPack-UI/hooks-js/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/ArtisanPack-UI/hooks-js/releases/tag/v1.0.0
