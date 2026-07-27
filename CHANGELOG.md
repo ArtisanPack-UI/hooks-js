@@ -10,4 +10,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Initial repository scaffold: TypeScript, tsup, Vitest (jsdom), ESLint, Prettier,
-  GitHub Actions CI matrix (Node 18 / 20 / 22), and dual entry points (`.` + `./react`).
+  GitHub Actions CI matrix (Node 20 / 22), and dual entry points (`.` + `./react`).
