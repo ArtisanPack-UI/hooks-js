@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Vue adapter** at `@artisanpack-ui/hooks-js/vue`, with the same surface as the
+  React adapter: `useFilter` (a computed ref of the filtered value), `useAction`,
+  `useHookedChildren` and `<HookSlot>`. They follow registry mutations, including
+  deprecated-alias buckets, take refs or getters for reactive inputs, and don't
+  subscribe or fire actions during server rendering. Vue (`^3.3.0`) is an
+  optional peer dependency.
+
 ## [1.0.0] - 2026-07-27
 
 Initial stable release of `@artisanpack-ui/hooks-js`. Public API is now stable and follows semantic versioning going forward.

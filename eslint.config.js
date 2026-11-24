@@ -7,11 +7,7 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   {
     files: ['src/**/*.{ts,tsx}'],
-    plugins: {
-      'react-hooks': reactHooksPlugin,
-    },
     rules: {
-      ...reactHooksPlugin.configs.recommended.rules,
       '@typescript-eslint/no-unused-vars': [
         'error',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
@@ -20,6 +16,18 @@ export default tseslint.config(
         'error',
         { prefer: 'type-imports' },
       ],
+    },
+  },
+  {
+    // Vue composables also start with `use`, but run in `setup()`, which the
+    // React rules of hooks would flag.
+    files: ['src/**/*.{ts,tsx}'],
+    ignores: ['src/vue/**'],
+    plugins: {
+      'react-hooks': reactHooksPlugin,
+    },
+    rules: {
+      ...reactHooksPlugin.configs.recommended.rules,
     },
   },
   {
