@@ -1,7 +1,7 @@
 {
   "name": "@artisanpack-ui/hooks-js",
   "version": "1.0.0",
-  "description": "WordPress-style actions and filters for JavaScript, with a React adapter.",
+  "description": "WordPress-style actions and filters for JavaScript, with React and Vue adapters.",
   "license": "MIT",
   "author": "Jacob Martella <me@jacobmartella.com>",
   "repository": {
@@ -30,6 +30,11 @@
       "types": "./dist/react.d.ts",
       "import": "./dist/react.mjs",
       "require": "./dist/react.cjs"
+    },
+    "./vue": {
+      "types": "./dist/vue.d.ts",
+      "import": "./dist/vue.mjs",
+      "require": "./dist/vue.cjs"
     }
   },
   "files": [
@@ -54,10 +59,14 @@
     "prepublishOnly": "npm run clean && npm run build"
   },
   "peerDependencies": {
-    "react": "^18.0.0 || ^19.0.0"
+    "react": "^18.0.0 || ^19.0.0",
+    "vue": "^3.3.0"
   },
   "peerDependenciesMeta": {
     "react": {
+      "optional": true
+    },
+    "vue": {
       "optional": true
     }
   },
@@ -65,6 +74,7 @@
     "@eslint/js": "^9.39.4",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
+    "@testing-library/vue": "^8.1.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.2.0",
@@ -78,7 +88,8 @@
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.57.2",
-    "vitest": "^4.1.2"
+    "vitest": "^4.1.2",
+    "vue": "^3.5.0"
   },
   "publishConfig": {
     "access": "public"

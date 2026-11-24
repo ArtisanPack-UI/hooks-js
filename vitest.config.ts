@@ -36,6 +36,12 @@ export default defineConfig({
           lines: 90,
           branches: 85,
         },
+        'src/vue/**': {
+          statements: 90,
+          functions: 90,
+          lines: 90,
+          branches: 85,
+        },
       },
     },
   },
